@@ -12,6 +12,11 @@ abstract class MyList[+A] {
   def map[B](trans: A => B): MyList[B]
   def filter(predicate: A => Boolean): MyList[A]
   def flatMap[B](trans: A => MyList[B]): MyList[B]
+
+  def forEach(f: A => Unit): Unit
+  def sort(compare: (A, A) => Int): MyList[A]
+  def zipWith[B, C](list: MyList[B], zip: (A, B) => C): MyList[C]
+  def reduce[B](begin: B)(operator: (A, B) => B): B
 }
 
 case object EmptyList extends MyList[Nothing] {
@@ -25,6 +30,13 @@ case object EmptyList extends MyList[Nothing] {
   def map[B](trans: Nothing => B): MyList[B] = EmptyList
   def filter(predicate: Nothing => Boolean): MyList[Nothing] = EmptyList
   def flatMap[B](trans: Nothing => MyList[B]): MyList[B] = EmptyList
+
+  def forEach(f: Nothing => Unit): Unit = ()
+  def sort(compare: (Nothing, Nothing) => Int): EmptyList.type = EmptyList
+  def zipWith[B, C](list: MyList[B], zip: (Nothing, B) => C): MyList[C] =
+    if (list.isEmpty) EmptyList
+    else throw new RuntimeException("Lists must have the same length")
+  def reduce[B](begin: B)(operator: (Nothing, B) => B): B = begin
 }
 
 case class Node[+A](first: A, left: MyList[A]) extends MyList[A] {
@@ -42,4 +54,24 @@ case class Node[+A](first: A, left: MyList[A]) extends MyList[A] {
     if (predicate(first)) Node(first, left.filter(predicate))
     else left.filter(predicate)
   def flatMap[B](trans: A => MyList[B]): MyList[B] = trans(first) ++ left.flatMap(trans)
+
+  def forEach(f: A => Unit): Unit = {
+    f(first)
+    left.forEach(f)
+  }
+
+  def sort(compare: (A, A) => Int): MyList[A] = {
+    def insert(x: A, sorted: MyList[A]): MyList[A] = {
+      if (sorted.isEmpty) Node(x, EmptyList)
+      else if (compare(x, sorted.head) <= 0) Node(x, sorted)
+      else Node(sorted.head, insert(x, sorted.tail))
+    }
+    insert(first, tail.sort(compare))
+  }
+
+  def zipWith[B, C](list: MyList[B], zip: (A, B) => C): MyList[C] =
+    if (list.isEmpty) throw new RuntimeException("Lists must have the same length")
+    else Node(zip(first, list.head), left.zipWith(list.tail, zip))
+
+  def reduce[B](begin: B)(operator: (A, B) => B): B = left.reduce(operator(first, begin))(operator)
 }

@@ -27,4 +27,9 @@ object main extends App {
 
   println(integerList ++ stringList)
   println(integerList == integerList.copy())
+
+  integerList.forEach(println)
+  println(integerList.sort((x: Int, y: Int) => y - x))
+  println(integerList.zipWith(stringList.addFront("X"), (x: Int, y: String) => x + ":" + y))
+  println(integerList.reduce(0)(_ + _))
 }
