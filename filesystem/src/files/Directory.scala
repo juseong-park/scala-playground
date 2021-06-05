@@ -2,7 +2,7 @@ package files
 
 class Directory(override val parentPath: String, override val name: String, val contents: List[DirectoryEntry])
   extends DirectoryEntry(parentPath, name) {
-
+  def hasEntry(name: String): Boolean = ???
 }
 
 object Directory {
