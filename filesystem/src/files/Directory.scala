@@ -30,6 +30,8 @@ class Directory(override val parentPath: String, override val name: String, val 
     new Directory(parentPath, name, contents.filter(x => !x.name.equals(entryName)) :+ newEntry)
 
   def toDirectory: Directory = this
+
+  def getType: String = "Directory"
 }
 
 object Directory {
