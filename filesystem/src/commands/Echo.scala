@@ -32,7 +32,8 @@ class Echo(args: Array[String]) extends Command {
   }
 
   def getRoot(currentDir: Directory, path: List[String], contents: String, append: Boolean): Directory = {
-    if (path.isEmpty) {
+    if (path.isEmpty) currentDir
+    else if (path.tail.isEmpty) {
       val dirEntry = currentDir.findEntry(path.head)
       if (dirEntry == null) currentDir.addEntry(new File(currentDir.path, path.head, contents))
       else if (dirEntry.isDirectory) currentDir
